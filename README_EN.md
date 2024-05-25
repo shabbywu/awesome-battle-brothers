@@ -130,15 +130,3 @@ enabled = true
 location = "D:\\SteamLibrary\\steamapps\\common\\Battle Brothers\\data"
 order = 100001
 ```
-
-> 说明:
-> 关于自定义字体(Font)
-> 1. 选择合适的字体, 将字体文件的绝对路径配置到 Font, 即可使用自定义字体
-> 2. Windows 用户可在 **C:\Windows\Fonts** 目录下找到系统内置的字体
-> 
-> 关于自定义 Mod 加载顺序(Mods)
-> 1. 当新增 Mod 时, 在使用启动器时会自动更新 Mod 列表
-> 2. 当 Mod 不存在或加载失败时, 启动器会跳过异常的 Mod
-> 3. 设置 enabled = false 可以跳过加载该 Mod
-> 4. 调整 order 值可以控制 Mod 的加载顺序
-> 5. 除非你正在游戏目录外开发 Mod, 否则请勿随意调整 location 值
