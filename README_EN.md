@@ -1,6 +1,6 @@
 Awesome Battle Brothers(震惊！战场兄弟)项目
 
-Awesome Battle Brothers 项目旨在增强游戏对 Mod 的支持和体验。
+The Awesome Battle Brothers project aims to enhance the game's mod support and experience.
 
 [中文说明](./README.md) | [EN README](./README_EN.md)
 
