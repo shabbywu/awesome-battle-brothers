@@ -1,0 +1,11 @@
+{
+  "dependencies": [
+    "toml11"
+  ],
+  "features": {
+    "with-python": {
+      "description": "install python dependencies", "dependencies": ["python3", "pybind11"]
+    },
+    "with-opengl-tools-dependencies": { "description": "install opengl-tools dependencies", "dependencies": ["opengl", "freetype", "glfw3"]}
+  }
+}
