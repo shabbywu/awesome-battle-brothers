@@ -1,0 +1,16 @@
+name: nakama-node-1
+data_dir: /nakama/data
+
+logger:
+  stdout: true
+  level: info
+
+console:
+  port: 7351
+
+socket:
+  server_key: "defaultkey"
+  max_message_size_bytes: 40960
+  max_request_size_bytes: 40960
+  read_buffer_size_bytes: 40960
+  write_buffer_size_bytes: 40960
