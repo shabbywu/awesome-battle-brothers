@@ -3,9 +3,7 @@
     "toml11"
   ],
   "features": {
-    "with-python": {
-      "description": "install python dependencies", "dependencies": ["python3", "pybind11"]
-    },
     "with-opengl-tools-dependencies": { "description": "install opengl-tools dependencies", "dependencies": ["opengl", "freetype", "glfw3"]}
-  }
+  },
+  "builtin-baseline": "055721089e8037d4d617250814d11f881e557549"
 }

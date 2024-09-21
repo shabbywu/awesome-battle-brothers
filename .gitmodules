@@ -1,4 +1,0 @@
-[submodule "bb-launcher/externals/SQUIRREL305"]
-    path = bb-launcher/externals/SQUIRREL305
-    url = https://github.com/shabbywu/squirrel.git
-    branch = sq305
