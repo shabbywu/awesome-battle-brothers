@@ -1,0 +1,6 @@
+[submodule "bb-launcher/externals/sqbind17"]
+	path = bb-launcher/externals/sqbind17
+	url = https://github.com/shabbywu/sqbind17.git
+[submodule "bb-launcher/externals/nlohmann_json"]
+	path = bb-launcher/externals/nlohmann_json
+	url = https://github.com/nlohmann/json.git
