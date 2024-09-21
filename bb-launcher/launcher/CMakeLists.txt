@@ -8,17 +8,9 @@ include_directories(${external_headers_dir})
 include_directories(${embedded_assets_dir})
 link_directories(${external_libs_dir})
 
-file(
-  GLOB
-  SOURCE
-  "src/*.h"
-  "src/*.cpp"
-  "src/hooks/*.h"
-  "src/hooks/*.cpp"
-  "src/sqext/*.cpp"
-  "src/version.rc")
+file(GLOB SOURCE "src/*.h" "src/*.cpp" "src/sqext/*.cpp" "src/version.rc")
 
-set(LIBS physfs-static libpeconv_mt bb-text-render squirrel-extensions)
+set(LIBS physfs-static libpeconv_mt bb-text-render bb-launcher-hooks sqbind17::header)
 
 add_executable(bb-launcher-gog ${SOURCE})
 target_link_libraries(bb-launcher-gog PRIVATE ${LIBS} bb-launcher-driver-gog)

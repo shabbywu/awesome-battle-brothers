@@ -59,12 +59,8 @@ add_subdirectory(${nlohmann_json_dir})
 add_subdirectory("opengl-tools")
 
 if(WIN32)
-  set(BUILD_SQUIRREL ON)
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/externals/sqbind17")
-  target_compile_options(squirrel_static PRIVATE /MT)
-  target_compile_options(sqstdlib_static PRIVATE /MT)
 
-  add_subdirectory("sqext")
   add_subdirectory("embedded_assets/embedded_exe")
   add_subdirectory("launcher")
   add_subdirectory("embedded_assets/online_battle")
