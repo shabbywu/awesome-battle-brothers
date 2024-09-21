@@ -1,68 +1,73 @@
 {
-    "version": 5,
-    "configurePresets": [
+  "version": 5,
+  "configurePresets": [
       {
-        "name": "slim-launcher",
-        "binaryDir": "${sourceDir}/build/${hostSystemName}/slim/",
-        "displayName": "Windows-X86 Release",
-        "description": "This build is only available on Windows",
-        "architecture": "Win32",
-        "generator": "Visual Studio 17 2022",
-        "cacheVariables": {
-          "SQUIRREL305": "1",
-          "VCPKG_TARGET_ARCHITECTURE": "x86",
-          "CMAKE_BUILD_TYPE": "Release",
-          "CMAKE_TOOLCHAIN_FILE": {
-            "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-            "type": "FILEPATH"
+          "name": "slim-launcher",
+          "binaryDir": "${sourceDir}/build/${hostSystemName}/slim/",
+          "description": "This build is only available on Windows",
+          "architecture": "Win32",
+          "generator": "Visual Studio 17 2022",
+          "cacheVariables": {
+              "SQUIRREL305": "1",
+              "VCPKG_TARGET_ARCHITECTURE": "x86",
+              "CMAKE_BUILD_TYPE": "Release",
+              "CMAKE_TOOLCHAIN_FILE": {
+                  "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                  "type": "FILEPATH"
+              },
+              "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/bin/slim/"
           },
-          "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/bin/slim/"
-      },
-      "environment": {
-        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/.vcpkg/triplets"
-      },
-        "condition": {
-          "type": "equals",
-          "lhs": "${hostSystemName}",
-          "rhs": "Windows"
-        }
+          "environment": {
+              "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/.vcpkg/triplets"
+          },
+          "condition": {
+              "type": "equals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+          }
       },
       {
-        "name": "opengl-test",
-        "binaryDir": "${sourceDir}/build/${hostSystemName}",
-        "displayName": "OpenGL Test",
-        "description": "This build is only available on not-Windows platform",
-        "cacheVariables": {
-          "CMAKE_BUILD_TYPE": "Release",
-          "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/bin"
+          "name": "online-battle",
+          "inherits": "slim-launcher",
+          "binaryDir": "${sourceDir}/build/${hostSystemName}/online-battle",
+          "environment": {
+              "BB_BUILD_WITH_ONLINE_MOD": "1"
+          },
+          "cacheVariables": {
+              "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/bin/online-battle/"
+          }
       },
-        "condition": {
-          "type": "notEquals",
-          "lhs": "${hostSystemName}",
-          "rhs": "Windows"
-        }
+      {
+          "name": "opengl-test",
+          "binaryDir": "${sourceDir}/build/${hostSystemName}",
+          "displayName": "OpenGL Test",
+          "description": "This build is only available on not-Windows platform",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release",
+              "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/bin"
+          },
+          "condition": {
+              "type": "notEquals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+          }
       }
-    ],
-    "buildPresets": [
+  ],
+  "buildPresets": [
       {
-        "name": "slim-launcher",
-        "configurePreset": "slim-launcher",
-        "configuration": "Release",
-        "condition": {
-          "type": "equals",
-          "lhs": "${hostSystemName}",
-          "rhs": "Windows"
-        }
+          "name": "slim-launcher",
+          "configurePreset": "slim-launcher",
+          "configuration": "Release"
       },
       {
-        "name": "opengl-test",
-        "configurePreset": "opengl-test",
-        "configuration": "Release",
-        "condition": {
-          "type": "notEquals",
-          "lhs": "${hostSystemName}",
-          "rhs": "Windows"
-        }
-      }
-    ]
+          "name": "opengl-test",
+          "configurePreset": "opengl-test",
+          "configuration": "Release"
+      },
+      {
+        "name": "online-battle",
+        "configurePreset": "online-battle",
+        "configuration": "Release"
+    }
+  ]
 }

@@ -1,16 +1,22 @@
 #pragma once
+#include <filesystem>
 #include <memory>
+#include <string>
 
+namespace launcher {
 struct LauncherMetadata {
-    bool valid();
-    std::filesystem::path& GetGamePath();
+    bool Valid();
+    std::filesystem::path &GetGamePath();
 
     // BattleBrothersExe API
     unsigned int GetBattleBrothersExeSize();
-    const char* GetBattleBrothersExeContent();
+    const char *GetBattleBrothersExeContent();
     std::string GetBattleBrothersExeDigest();
 };
 
-LauncherMetadata* DetectLauncherMetadata();
+LauncherMetadata *DetectLauncherMetadata();
 
-bool setup_launcher(LauncherMetadata* metadata, char* self);
+bool setup_launcher(LauncherMetadata *metadata, char *self);
+void atexit(bool pause = true);
+
+} // namespace launcher

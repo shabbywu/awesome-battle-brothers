@@ -36,23 +36,23 @@ file(
   "src/utils/*.cpp")
 
 add_library(opengl-tools ${TOOLS_SOURCE})
-target_link_libraries(opengl-tools ${LIBS_MT})
+target_link_libraries(opengl-tools PUBLIC ${LIBS_MT})
 set_property(TARGET opengl-tools PROPERTY CXX_STANDARD 20)
 
 file(GLOB BB_SOURCE "src/utils/*.h" "src/utils/*.cpp" "src/bb-text-render/*.h"
      "src/bb-text-render/*.cpp")
 
 add_library(bb-text-render ${BB_SOURCE})
-target_link_libraries(bb-text-render opengl-tools ${LIBS_MT})
+target_link_libraries(bb-text-render PUBLIC ${LIBS_MT} opengl-tools)
 set_property(TARGET bb-text-render PROPERTY CXX_STANDARD 20)
 
 add_executable(opengl-test src/testcase/main.cpp)
 if(WIN32)
   add_library(opengl-tools-M ${TOOLS_SOURCE})
-  target_link_libraries(opengl-tools-M ${LIBS_MD})
-  target_link_libraries(opengl-test opengl-tools-M glfw_mt)
+  target_link_libraries(opengl-tools-M PUBLIC ${LIBS_MD})
+  target_link_libraries(opengl-test PUBLIC opengl-tools-M glfw)
   target_compile_options(opengl-tools-M PRIVATE $<$<CONFIG:Release>:-MD>)
   target_compile_options(opengl-test PRIVATE $<$<CONFIG:Release>:-MD>)
 else()
-  target_link_libraries(opengl-test opengl-tools glfw)
+  target_link_libraries(opengl-test PUBLIC opengl-tools glfw)
 endif()
