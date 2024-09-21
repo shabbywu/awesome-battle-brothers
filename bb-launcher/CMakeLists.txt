@@ -1,25 +1,9 @@
 # CMakeList.txt: 顶层 CMake 项目文件，在此处执行全局配置 并包含子项目。
 #
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.26)
 
 if(NOT WIN32)
   list(APPEND VCPKG_MANIFEST_FEATURES "with-opengl-tools-dependencies")
-endif()
-
-set(VCPKG_OVERLAY_PORTS
-    "${CMAKE_CURRENT_LIST_DIR}/.vcpkg/ports/physfs"
-    "${CMAKE_CURRENT_LIST_DIR}/.vcpkg/ports/wslay"
-    "${CMAKE_CURRENT_LIST_DIR}/.vcpkg/ports/nakama-sdk")
-set(VCPKG_OVERLAY_TRIPLETS "${CMAKE_CURRENT_LIST_DIR}/.vcpkg/triplets")
-
-# Enable VCPKG if VCPKG_ROOT defined.
-set(vcpkg "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
-
-if(NOT CMAKE_TOOLCHAIN_FILE AND EXISTS "${vcpkg}")
-  set(CMAKE_TOOLCHAIN_FILE
-      "${vcpkg}"
-      CACHE FILEPATH "CMake toolchain file")
-  message(STATUS "vcpkg toolchain found: ${CMAKE_TOOLCHAIN_FILE}")
 endif()
 
 project("bb-launcher")
@@ -35,10 +19,19 @@ set(BIN2CPP_COMMAND ${CMAKE_CURRENT_LIST_DIR}/externals/bin/bin2cpp.exe)
 
 set(nlohmann_json_dir ${CMAKE_CURRENT_LIST_DIR}/externals/nlohmann_json)
 set(external_headers_dir ${CMAKE_CURRENT_LIST_DIR}/externals/includes)
-set(external_libs_dir ${CMAKE_CURRENT_LIST_DIR}/externals/libs)
 set(embedded_assets_dir ${CMAKE_CURRENT_LIST_DIR}/embedded_assets)
-
 set(opengl-tools-src-dir ${CMAKE_CURRENT_LIST_DIR}/opengl-tools/src)
+
+file(
+  DOWNLOAD
+  https://github.com/shabbywu/awesome-battle-brothers/archive/refs/heads/external-libs.zip
+  ${CMAKE_CURRENT_BINARY_DIR}/external-libs.zip
+  SHOW_PROGRESS
+  EXPECTED_MD5 1fe6e6d8bc542c17af7e0f1fa64e0ae4)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/external-libs.zip
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+set(external_libs_dir
+    ${CMAKE_CURRENT_BINARY_DIR}/awesome-battle-brothers-external-libs/libs)
 
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
