@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/heroiclabs/nakama-common/runtime"
-	"github.com/tidwall/gjson"
+	"online-championships/pkg/protocol"
 )
 
 func RpcCreateMatch(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
@@ -26,10 +26,33 @@ func RpcCreateMatch(ctx context.Context, logger runtime.Logger, db *sql.DB, nk r
 		logger.Error("MatchGet err: %v", err)
 		return "", err
 	}
-	label := match.GetLabel().String()
+	var label MatchLabel
+	_ = json.Unmarshal([]byte(match.GetLabel().String()), &label)
 	return string(DumpEvent(MatchCreatedEvent{
 		Id:          matchId,
-		Name:        gjson.Get(label, "name").String(),
-		Description: gjson.Get(label, "description").String(),
+		Name:        label.Name,
+		Description: label.Description,
+		Metadata:    label.Metadata,
 	})), nil
+}
+
+func RpcGetCommandLog(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
+	var query CommandLogQueryRequest
+	if err := json.Unmarshal([]byte(payload), &query); err != nil {
+		return "", runtime.NewError("unable to unmarshal payload", 13)
+	}
+	if query.MatchID == "" {
+		return "", runtime.NewError("matchId is required", 13)
+	}
+	signal := MatchSignalRequest{
+		SchemaVersion: protocol.SchemaVersion,
+		Kind:          MatchSignalKindCommandLogQuery,
+		CommandLog:    &query,
+	}
+	response, err := nk.MatchSignal(ctx, query.MatchID, string(DumpEvent(signal)))
+	if err != nil {
+		logger.Error("MatchSignal command log query err: %v", err)
+		return "", err
+	}
+	return response, nil
 }

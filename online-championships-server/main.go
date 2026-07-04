@@ -16,5 +16,9 @@ func InitModule(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runti
 		logger.Error("[RegisterRpc] error: ", err.Error())
 		return err
 	}
+	if err := initializer.RegisterRpc("getCommandLog", matches.RpcGetCommandLog); err != nil {
+		logger.Error("[RegisterRpc] error: ", err.Error())
+		return err
+	}
 	return nil
 }

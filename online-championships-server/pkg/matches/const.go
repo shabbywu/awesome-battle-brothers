@@ -1,5 +1,7 @@
 package matches
 
+const MatchTickRate = 10
+
 const (
 	OpCodeMatchTerminate = iota + 100
 	OpCodeMatchFactionDispatch
@@ -9,6 +11,7 @@ const (
 const (
 	OpCodeOpponentReady = iota + 200
 	OpCodeMatchStart
+	OpCodeOpponentForceQuit
 )
 
 const (

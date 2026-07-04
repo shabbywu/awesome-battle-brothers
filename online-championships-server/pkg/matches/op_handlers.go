@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"github.com/heroiclabs/nakama-common/runtime"
 	"github.com/samber/lo"
+	"online-championships/pkg/protocol"
 )
 
 var handlers = map[int64]func(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, dispatcher runtime.MatchDispatcher, state interface{}, message runtime.MatchData){}
@@ -28,6 +29,10 @@ func broadcastMessageToAllOtherPresences(ctx context.Context, logger runtime.Log
 
 func onOpponentReady(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, dispatcher runtime.MatchDispatcher, state interface{}, message runtime.MatchData) {
 	mState, _ := state.(*MatchState)
+	if mState.roomRuntime != nil {
+		logger.Info("legacy opponent ready ignored for v1 room")
+		return
+	}
 	if p, ok := mState.presences[message.GetSessionId()]; ok {
 
 		payload := message.GetData()
@@ -58,22 +63,73 @@ func onOpponentReady(ctx context.Context, logger runtime.Logger, db *sql.DB, nk 
 
 func onBattleEnd(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, dispatcher runtime.MatchDispatcher, state interface{}, message runtime.MatchData) {
 	mState, _ := state.(*MatchState)
+	if mState.roomRuntime != nil {
+		logger.Info("legacy battle end ignored for v1 room")
+		return
+	}
+	senderFaction := factionForSession(mState, message.GetSessionId())
+	if senderFaction == FactionNone {
+		logger.Info("battle end ignored for unseated session %s", message.GetSessionId())
+		return
+	}
 	payload := message.GetData()
 	var event BattleEndEvent
 	if err := json.Unmarshal([]byte(payload), &event); err != nil {
 		logger.Error("unable to unmarshal roster: %v", err)
 		return
 	}
-	if _, ok := mState.factions[event.Faction]; ok {
+	if event.Faction != senderFaction {
+		logger.Info("battle end ignored for mismatched faction: sender=%d event=%d", senderFaction, event.Faction)
+		return
+	}
+	if event.Faction == FactionRedSide || event.Faction == FactionBlueSide {
 		mState.battleResult[event.Faction] = event.IsVictory
+	}
+	if mState.totalFaction == 0 && mState.roomRuntime != nil {
+		mState.totalFaction = 2
 	}
 	if len(mState.battleResult) == mState.totalFaction {
 		mState.battleEnd = true
 	}
 }
 
+func onOpponentForceQuit(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, dispatcher runtime.MatchDispatcher, state interface{}, message runtime.MatchData) {
+	mState, _ := state.(*MatchState)
+	if mState.roomRuntime != nil {
+		logger.Info("legacy force quit ignored for v1 room")
+		return
+	}
+	loserFaction := factionForSession(mState, message.GetSessionId())
+	winnerFaction := oppositeFaction(loserFaction)
+	if loserFaction == FactionNone || winnerFaction == FactionNone {
+		logger.Info("force quit ignored for unseated session %s", message.GetSessionId())
+		return
+	}
+
+	mState.battleStarted = true
+	mState.battleEnd = true
+	mState.battleEndEventBroadcast = true
+	mState.totalFaction = 2
+	mState.battleResult[loserFaction] = false
+	mState.battleResult[winnerFaction] = true
+	if mState.roomRuntime != nil {
+		mState.roomRuntime.Status = protocol.RoomStatusClosed
+	}
+
+	if err := dispatcher.BroadcastMessage(OpCodeBattleEnd, DumpEvent(BattleEndEvent{
+		Faction:   winnerFaction,
+		IsVictory: true,
+	}), nil, message, true); err != nil {
+		logger.Error("err in broadcasting force quit battle result: %v", err)
+	}
+}
+
 func startBattle(logger runtime.Logger, dispatcher runtime.MatchDispatcher, state interface{}) {
 	mState, _ := state.(*MatchState)
+	if mState.roomRuntime != nil {
+		logger.Info("legacy start battle ignored for v1 room")
+		return
+	}
 	mState.totalFaction = len(mState.factions)
 	event := StartMatchEvent{
 		PresenceFactions: map[string]int{},
@@ -92,7 +148,42 @@ func startBattle(logger runtime.Logger, dispatcher runtime.MatchDispatcher, stat
 	}
 }
 
+func factionForSession(mState *MatchState, sessionID string) int {
+	if mState.roomRuntime != nil {
+		if seat, ok := mState.roomRuntime.SeatForSession(sessionID); ok {
+			return factionForSeat(seat)
+		}
+	}
+	if p := mState.presences[sessionID]; p != nil {
+		return p.Faction
+	}
+	return FactionNone
+}
+
+func factionForSeat(seat protocol.Seat) int {
+	switch seat {
+	case protocol.SeatRed:
+		return FactionRedSide
+	case protocol.SeatBlue:
+		return FactionBlueSide
+	default:
+		return FactionNone
+	}
+}
+
+func oppositeFaction(faction int) int {
+	switch faction {
+	case FactionRedSide:
+		return FactionBlueSide
+	case FactionBlueSide:
+		return FactionRedSide
+	default:
+		return FactionNone
+	}
+}
+
 func init() {
 	handlers[OpCodeOpponentReady] = onOpponentReady
 	handlers[OpCodeBattleEnd] = onBattleEnd
+	handlers[OpCodeOpponentForceQuit] = onOpponentForceQuit
 }
